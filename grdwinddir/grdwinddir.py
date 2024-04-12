@@ -37,25 +37,25 @@ def load_model_m64rn4(model_path, input_shape, data_augmentation, learning_rate)
     return model_m64rn4
 
 
-def wind_dir_prediction(file_path, model_path, input_shape, tiling_mode, tile_size, posting_loc, resolution, noverlap=0,
-                        centering=False, side='left', data_augmentation=True, learning_rate=1e-3, save=False,
-                        save_dir='.'):
+def wind_dir_prediction(file_path, model_path, input_shape, tiling_mode, tile_size, resolution, posting_loc=None,
+                        noverlap=0, centering=False, side='left', data_augmentation=True, learning_rate=1e-3,
+                        save=False, save_dir='.'):
     """
     Predict wind direction using saved models and radar/SAR tiles.
 
-    Parameters: - file_path (str): Path to the radar or SAR dataset. - model_path (str): Path to the directory
-    containing saved model weights. - input_shape (tuple): Shape of the input data expected by the model. -
-    tiling_mode (str): Mode for tiling the dataset. Options: 'tiling_all', 'tiling_points'. - tile_size (int or
-    dict): Size of the tiles for tiling the dataset. If dict, should contain 'line' and 'sample' keys. - posting_loc
-    (tuple, optional): Location for tiling the dataset, required if tiling_mode is 'tiling_points'. Defaults to None.
-    - resolution (str, optional): Resolution of the dataset. Defaults to None. - noverlap (int or dict, optional):
-    Number of overlapping pixels between adjacent tiles. If dict, should contain 'line' and 'sample' keys. Defaults
-    to 0. - centering (bool, optional): Whether to center the tiles. Defaults to False. - side (str, optional): Side
-    to use when centering the tiles ('left' or 'right'). Defaults to 'left'. - data_augmentation (bool, optional):
-    Whether data augmentation is applied during training. Defaults to True. - learning_rate (float, optional):
-    Learning rate used during training. Defaults to 1e-3. - save (bool, optional): Whether to save the predicted
-    tiles. Defaults to True. - save_dir (str, optional): Directory where the predicted tiles should be saved.
-    Defaults to '.'.
+    Parameters: - file_path (str): Path to the radar or SAR dataset.
+    - model_path (str): Path to the directory containing saved model weights. - input_shape (tuple): Shape of the input data expected by the model.
+    - tiling_mode (str): Mode for tiling the dataset. Options: 'tiling_prod', 'tiling_by_point'.
+    - tile_size (int or dict): Size of the tiles for tiling the dataset. If dict, should contain 'line' and 'sample' keys.
+    - posting_loc (tuple, optional): Location for tiling the dataset, required if tiling_mode is 'tiling_by_point'. Defaults to None.
+    - resolution (str, optional): Resolution of the dataset. Defaults to None.
+    - noverlap (int or dict, optional): Number of overlapping pixels between adjacent tiles. If dict, should contain 'line' and 'sample' keys. Defaults to 0.
+    - centering (bool, optional): Whether to center the tiles. Defaults to False.
+    - side (str, optional): Side to use when centering the tiles ('left' or 'right'). Defaults to 'left'.
+    - data_augmentation (bool, optional): Whether data augmentation is applied during training. Defaults to True.
+    - learning_rate (float, optional): Learning rate used during training. Defaults to 1e-3.
+    - save (bool, optional): Whether to save the predicted tiles. Defaults to False.
+    - save_dir (str, optional): Directory where the predicted tiles should be saved. Defaults to '.'.
 
     Returns:
     - tiles_with_prediction (xarray.Dataset): Radar or SAR tiles dataset with predicted wind direction added.
@@ -63,16 +63,16 @@ def wind_dir_prediction(file_path, model_path, input_shape, tiling_mode, tile_si
     path_best_models = glob.glob(os.path.join(model_path, "*.hdf5"))
     all_model = load_model_m64rn4(model_path=path_best_models, input_shape=input_shape,
                                   data_augmentation=data_augmentation, learning_rate=learning_rate)
-    if tiling_mode == 'tiling_all':
+    if tiling_mode == 'tiling_prod':
         dataset, tiles = tiling_prod(path=file_path, tile_size=tile_size, resolution=resolution, noverlap=noverlap,
                                      centering=centering, side=side, save=save, save_dir=save_dir)
-    elif tiling_mode == 'tiling_points':
+    elif tiling_mode == 'tiling_by_point':
         if posting_loc is None:
-            raise ValueError("Posting location must be provided when tiling_mode is 'tiling_points'.")
+            raise ValueError("Posting location must be provided when tiling_mode is 'tiling_by_point'.")
         dataset, tiles = tiling_by_point(path=file_path, posting_loc=posting_loc, tile_size=tile_size,
                                          resolution=resolution, save=save, save_dir=save_dir)
     else:
-        raise ValueError("Invalid tiling mode. Please choose either 'tiling_all' or 'tiling_points'.")
+        raise ValueError("Invalid tiling mode. Please choose either 'tiling_prod' or 'tiling_by_point'.")
 
     tiles_with_prediction = predict_wind_direction(tiles=tiles, model=all_model, input_shape=input_shape, save=save,
                                                    save_dir=save_dir)
