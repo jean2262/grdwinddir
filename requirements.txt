@@ -1,0 +1,9 @@
+numpy~=1.26.4
+tqdm~=4.66.2
+l2awinddirection~=2024.4.3
+cartopy~=0.22.0
+shapely~=2.0.3
+xsar~=2024.2.1
+xarray~=2024.3.0
+xsarsea~=0.9
+scipy~=1.12.0
