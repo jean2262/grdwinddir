@@ -188,6 +188,8 @@ def tiling(dataset, tile_size, noverlap, centering, side):
             else:
                 tiles.append(
                     subset.drop_indexes(['line', 'sample']).rename_dims({'line': 'tile_line', 'sample': 'tile_sample'}))
+    if not tiles:
+        raise ValueError('No tiles')
 
     tiles_with_footprint = add_tiles_footprint(tiles)
     all_tiles = xr.concat(tiles_with_footprint, dim='tile')

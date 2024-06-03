@@ -37,7 +37,7 @@ def load_model_m64rn4(model_path, input_shape, data_augmentation, learning_rate)
     return model_m64rn4
 
 
-def wind_dir_prediction(file_path, model_path, input_shape, tiling_mode, tile_size, resolution, posting_loc=None,
+def wind_dir_prediction(file_path, model_path, input_shape, n_jobs, tiling_mode, tile_size, resolution, posting_loc=None,
                         noverlap=0, centering=False, side='left', data_augmentation=True, learning_rate=1e-3,
                         save=False, save_dir='.'):
     """
@@ -74,7 +74,7 @@ def wind_dir_prediction(file_path, model_path, input_shape, tiling_mode, tile_si
     else:
         raise ValueError("Invalid tiling mode. Please choose either 'tiling_prod' or 'tiling_by_point'.")
 
-    tiles_with_prediction = predict_wind_direction(tiles=tiles, model=all_model, input_shape=input_shape, save=save,
-                                                   save_dir=save_dir)
+    tiles_with_prediction = predict_wind_direction(tiles=tiles, model=all_model, input_shape=input_shape, n_jobs=n_jobs,
+                                                   save=save, save_dir=save_dir)
 
     return tiles, tiles_with_prediction
